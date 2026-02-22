@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zoro AI - Workspace</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #050505; color: #00f3ff; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .window { width: 90%; max-width: 900px; height: 85vh; background: rgba(10, 10, 10, 0.9); border: 1px solid #00f3ff; border-radius: 15px; display: flex; flex-direction: column; box-shadow: 0 0 25px rgba(0, 243, 255, 0.2); }
+        .header { padding: 15px; border-bottom: 1px solid #00f3ff; text-align: center; font-weight: bold; letter-spacing: 2px; }
+        #chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .msg { padding: 12px 18px; border-radius: 12px; max-width: 75%; line-height: 1.5; font-size: 14px; }
+        .user { align-self: flex-end; background: #00f3ff; color: #000; font-weight: 500; box-shadow: 0 0 10px rgba(0, 243, 255, 0.3); }
+        .bot { align-self: flex-start; background: #1a1a1a; border: 1px solid #333; color: #e0e0e0; }
+        .input-bar { padding: 20px; border-top: 1px solid #222; display: flex; gap: 10px; }
+        input { flex: 1; background: #111; border: 1px solid #00f3ff; border-radius: 8px; padding: 12px; color: #fff; outline: none; }
+        button { background: #00f3ff; color: #000; border: none; padding: 0 25px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background: #fff; box-shadow: 0 0 15px #00f3ff; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #00f3ff; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div class="window">
+        <div class="header">ZORO AI SYSTEM v1.0</div>
+        <div id="chat-container">
+            <div class="msg bot">System Initialized. I am Zoro AI, created by Gaurav Wadekar. How can I assist you today?</div>
+        </div>
+        <div class="input-bar">
+            <input type="text" id="user-input" placeholder="Enter command or question..." onkeypress="if(event.key === 'Enter') handleSend()">
+            <button onclick="handleSend()">SEND</button>
+        </div>
+    </div>
+
+    <script>
+        async function handleSend() {
+            const input = document.getElementById('user-input');
+            const container = document.getElementById('chat-container');
+            const text = input.value.trim();
+            if (!text) return;
+
+            // User Message
+            container.innerHTML += `<div class="msg user">${text}</div>`;
+            input.value = '';
+            container.scrollTop = container.scrollHeight;
+
+            // Thinking...
+            const loadingMsg = document.createElement('div');
+            loadingMsg.className = 'msg bot';
+            loadingMsg.innerText = 'Zoro is processing...';
+            container.appendChild(loadingMsg);
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+                const data = await response.json();
+                loadingMsg.innerText = data.reply;
+            } catch (err) {
+                loadingMsg.innerText = "Connection Error: Make sure your Python 'app.py' is running in CMD!";
+            }
+            container.scrollTop = container.scrollHeight;
+        }
+    </script>
+</body>
+</html>
